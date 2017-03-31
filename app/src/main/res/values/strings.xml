@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ADB Mock Location</string>
+    <string name="text">Steps:\n1) Go to Settings>Developer Options> Allow Mock Locations\n 2) In the same menu. Associate ADB Mock Location with Mock Location feature \n3) Open command line and you can now push location with following command: \n
+    adb shell am start -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockActivity --es latLon 49.224599,17.657078</string>
+</resources>
