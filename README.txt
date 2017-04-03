@@ -16,12 +16,11 @@ adb shell am start -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.Mock
 
 
 Using service for spawning locations in circle from given reference point and given time interval:
-
 adb shell am startservice -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockService --es loc 49.224599,17.657078 --ez circle true --ei distance 10 --ei interval 30
 
-- distance: [km]
-- interval: [s]
+- distance: radius in [km]
+- interval: interval between location changes [s]
 - circle: true if location should be spawn in cirlce / false will spawn location as single point
 
 Command to stop spawning location in circle:
-adb shell am startservice -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockService
+adb shell am stoptservice -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockService
