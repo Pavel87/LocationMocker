@@ -17,6 +17,7 @@ public class MockService extends Service {
     private final static int SATELLITE_COUNT = 5;
     protected LocationManager mLocationManager;
     boolean isADBCommandCorrect = false;
+    boolean stopLocationUpdates = false;
 
     private boolean isCircle = false;
     private boolean isRectangle = false;
@@ -37,48 +38,43 @@ public class MockService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.d("PACMAC", "MockService onStartCommand");
+
+        stopLocationUpdates = false;
         double lat = 48.424152;
         double lon = -123.356799;
 
-        boolean isCircle = intent.getBooleanExtra("circle", false);
+        isCircle = intent.getBooleanExtra("circle", false);
         String location = intent.getStringExtra("loc");
         if (location != null) {
             String[] latLon = location.split(",");
             lat = Double.parseDouble(latLon[0]);
             lon = Double.parseDouble(latLon[1]);
             isADBCommandCorrect = true;
+        } else {
+            isADBCommandCorrect = false;
         }
+
         double alt = (double) intent.getIntExtra("alt", 200);
         distance = intent.getIntExtra("distance", 10);
         timeInterval = intent.getIntExtra("interval", 30) * 1000;
 
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        if (handler != null && runnable != null) {
-            handler.removeCallbacks(runnable);
-        }
 
         if (isCircle) {
+            stopLocationUpdates = false;
             Utils.registerTestProvider(mLocationManager);
             spawnLocationInCircle(lat * RAD_CONST, lon * RAD_CONST, alt);
         } else if (isADBCommandCorrect) {
+            stopLocationUpdates = true;
             Utils.registerTestProvider(mLocationManager);
-            Log.d("PACMAC", "Pushing new location " + lat + ", " + lon);
             Utils.mocLocation(mLocationManager,
                     Utils.createMockLocation(lat, lon, alt, SATELLITE_COUNT));
             stopSelf();
         }
-
         return START_NOT_STICKY;
     }
-
-    /*
-     * Formula: φ2 = asin( sin φ1 ⋅ cos δ + cos φ1 ⋅ sin δ ⋅ cos θ ) λ2 = λ1 +
-     * atan2( sin θ ⋅ sin δ ⋅ cos φ1, cos δ − sin φ1 ⋅ sin φ2 ) where φ is
-     * latitude, λ is longitude, θ is the bearing (clockwise from north), δ is
-     * the angular distance d/R; d being the distance travelled, R the earth’s
-     * radius
-     */
 
     private void spawnLocationInCircle(final double latitudeCenter, final double longitudeCenter,
             final double altitude) {
@@ -89,9 +85,13 @@ public class MockService extends Service {
             public void run() {
 
                 if (degree > 359) {
-                    handler.removeCallbacks(this);
                     degree = 0;
+                }
+                if (stopLocationUpdates) {
+                    handler.removeCallbacks(this);
+                    Log.d("PACMAC", "location handler removed");
                     stopSelf();
+                    return;
                 }
 
                 double latitude;
@@ -114,6 +114,7 @@ public class MockService extends Service {
                         toDegrees(longitude), altitude, SATELLITE_COUNT));
 
                 handler.postDelayed(this, timeInterval);
+
             }
         };
 
@@ -128,9 +129,11 @@ public class MockService extends Service {
 
     @Override
     public void onDestroy() {
+        stopLocationUpdates = true;
         if (handler != null && runnable != null) {
             handler.removeCallbacks(runnable);
         }
+        Log.d("PACMAC", "MockServiceDestroyed");
         super.onDestroy();
 
     }

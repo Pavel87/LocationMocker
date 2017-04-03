@@ -1,0 +1,27 @@
+ADB Mock Location app guide:
+
+
+
+Before using any ADB command:
+
+1) Install ADB Mock Location.apk
+2) Go to Settings>Location> set Device Only
+
+
+
+ADB Commands:
+
+Single point location:
+adb shell am start -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockActivity --es loc 49.224599,17.657078
+
+
+Using service for spawning locations in circle from given reference point and given time interval:
+
+adb shell am startservice -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockService --es loc 49.224599,17.657078 --ez circle true --ei distance 10 --ei interval 30
+
+- distance: [km]
+- interval: [s]
+- circle: true if location should be spawn in cirlce / false will spawn location as single point
+
+Command to stop spawning location in circle:
+adb shell am startservice -n com.pacmac.adbmocklocation/com.pacmac.adbmocklocation.MockService

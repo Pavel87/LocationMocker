@@ -19,7 +19,6 @@ public class MockActivity extends Activity {
 
     boolean isADBCommandCorrect = false;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +29,7 @@ public class MockActivity extends Activity {
         double lat = 48.424152;
         double lon = -123.356799;
 
-        String location = intent.getStringExtra("latLon");
+        String location = intent.getStringExtra("loc");
         if (location != null) {
             String[] latLon = location.split(",");
             lat = Double.parseDouble(latLon[0]);
