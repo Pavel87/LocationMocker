@@ -39,38 +39,42 @@ public class MockService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.d("PACMAC", "MockService onStartCommand");
-
-        stopLocationUpdates = false;
-        double lat = 48.424152;
-        double lon = -123.356799;
-
-        isCircle = intent.getBooleanExtra("circle", false);
-        String location = intent.getStringExtra("loc");
-        if (location != null) {
-            String[] latLon = location.split(",");
-            lat = Double.parseDouble(latLon[0]);
-            lon = Double.parseDouble(latLon[1]);
-            isADBCommandCorrect = true;
-        } else {
-            isADBCommandCorrect = false;
-        }
-
-        double alt = (double) intent.getIntExtra("alt", 200);
-        distance = intent.getIntExtra("distance", 10);
-        timeInterval = intent.getIntExtra("interval", 30) * 1000;
-
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-
-        if (isCircle) {
+        try {
             stopLocationUpdates = false;
-            Utils.registerTestProvider(mLocationManager);
-            spawnLocationInCircle(lat * RAD_CONST, lon * RAD_CONST, alt);
-        } else if (isADBCommandCorrect) {
-            stopLocationUpdates = true;
-            Utils.registerTestProvider(mLocationManager);
-            Utils.mocLocation(mLocationManager,
-                    Utils.createMockLocation(lat, lon, alt, SATELLITE_COUNT));
+            double lat = 48.424152;
+            double lon = -123.356799;
+
+            isCircle = intent.getBooleanExtra("circle", false);
+            String location = intent.getStringExtra("loc");
+            if (location != null && location.contains(",")) {
+                String[] latLon = location.split(",");
+                lat = Double.parseDouble(latLon[0]);
+                lon = Double.parseDouble(latLon[1]);
+                isADBCommandCorrect = true;
+            } else {
+                isADBCommandCorrect = false;
+            }
+
+            double alt = (double) intent.getIntExtra("alt", 200);
+            distance = intent.getIntExtra("distance", 10);
+            timeInterval = intent.getIntExtra("interval", 30) * 1000;
+
+            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+            if (isCircle) {
+                stopLocationUpdates = false;
+                Utils.registerTestProvider(mLocationManager);
+                spawnLocationInCircle(lat * RAD_CONST, lon * RAD_CONST, alt);
+            } else if (isADBCommandCorrect) {
+                stopLocationUpdates = true;
+                Utils.registerTestProvider(mLocationManager);
+                Utils.mocLocation(mLocationManager,
+                        Utils.createMockLocation(lat, lon, alt, SATELLITE_COUNT));
+                stopSelf();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             stopSelf();
         }
         return START_NOT_STICKY;

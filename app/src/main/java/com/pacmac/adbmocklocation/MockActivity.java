@@ -47,9 +47,12 @@ public class MockActivity extends Activity {
             return;
         }
 
-        this.finishAffinity();
+
     }
 
-
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.finish();
+    }
 }
